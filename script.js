@@ -227,22 +227,31 @@ function initSmoothNavScroll() {
 
   links.forEach(link => {
     link.addEventListener('click', (e) => {
-      const targetId = link.getAttribute('href').substring(1);
-      if (!targetId) return;
+      const href = link.getAttribute('href');
+      if (!href || href === '#') return;
+      const targetId = href.substring(1);
 
       const targetElement = document.getElementById(targetId);
       if (targetElement) {
         e.preventDefault();
-        targetElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
+        
+        // Accurate smooth scroll taking fixed navbar height into consideration
+        const navHeight = document.getElementById('navbar') ? document.getElementById('navbar').offsetHeight : 75;
+        const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - (navHeight + 10);
+
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
         });
 
-        // Update active class immediately on click
-        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-        if (link.classList.contains('nav-link')) {
-          link.classList.add('active');
-        }
+        // Update active class on nav links
+        document.querySelectorAll('.nav-link').forEach(l => {
+          if (l.getAttribute('href') === '#' + targetId) {
+            l.classList.add('active');
+          } else {
+            l.classList.remove('active');
+          }
+        });
       }
     });
   });
